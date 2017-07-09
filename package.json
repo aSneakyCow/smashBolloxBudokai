@@ -1,0 +1,36 @@
+{
+  "name": "nodejs-physijs",
+  "version": "0.1.5",
+  "description": "the physijs physics engine, running server-side on nodejs",
+  "dependencies": {
+    "express": "^4.10.2",
+    "socket.io": "^1.7.4"
+  },
+  "files": [
+      "package.json",
+      "README",
+      "nodejs"
+  ],
+  "keywords": [
+      "physijs",
+      "threejs",
+      "three",
+      "physics"
+  ],
+  "scripts": {
+    "start": "node server.js"
+  },
+  "main": "server.js",
+  "contributors": [
+      {
+          "name" : "Jonas Gehring",
+          "email" : "g.jjoe64@googlemail.com",
+          "url" : "http://www.jjoe64.com"
+      },
+      {
+          "name": "Gary Weiss",
+          "email": "garyweiss74@googlemail.com"
+      }
+  ],
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="//threejs.org/build/three.js"></script>
+    <script type="text/javascript" src="/js/shared.js"></script>
+    <script type="text/javascript" src="/client/client_world.js"></script>
+    <script type="text/javascript" src="client/physi.js"></script>
+    <script type="text/javascript" src="js/mainloop.js"></script>
+
+    <style>
+        body {
+            margin: 0px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+
+
+<div id="container"></div>
+<script>
+    // console.log("Separate all of the code that calculates physics for players")
+    // console.log("Do server side calculations at a regular tick rate")
+    // console.log("If the player renders a frame before getting one from the server, calculate where the player is going to be")
+    // console.log("Obviously don't call rendering on server side")
+
+    // console.log(Physijs);
+
+    /*checKKeyStates -> socket.emit('updatePosition', playerData);
+    -> var newData = world.updatePlayerData(data); */
+
+    //https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getGamepads
+
+    function update(delta) {
+        // console.log(delta)
+        // console.log('update')
+        // for (var i = 0, l = planets.length; i < l; i++) {
+        //     planets[i].update(delta);
+        // }
+    }
+
+    function draw(interpolationPercentage) {
+        // console.log(interpolationPercentage)
+        // console.log('interpolationPercentage')
+        // context.clearRect(0, 0, canvas.width, canvas.height);
+        // for (var i = 0, l = planets.length; i < l; i++) {
+        //     planets[i].draw(interpolationPercentage);
+        // }
+    }
+
+    function end(fps, panic) {
+        // console.log(fps)
+        // console.log("fps")
+        // fpsCounter.textContent = Math.round(fps) + ' FPS';
+        // if (panic) {
+        //     // This pattern introduces non-deterministic behavior, but in this case
+        //     // it's better than the alternative (the application would look like it
+        //     // was running very quickly until the simulation caught up to real
+        //     // time). See the documentation for `MainLoop.setEnd()` for additional
+        //     // explanation.
+        //     var discardedTime = Math.round(MainLoop.resetFrameDelta());
+        //     console.warn('Main loop panicked, probably because the browser tab was put in the background. Discarding ' + discardedTime + 'ms');
+        // }
+    }
+
+    // MainLoop.setUpdate(update)
+    //     .setDraw(draw)
+    //     .setEnd(end)
+    //     .start();
+
+    // var socket = io('ws://localhost:8080');
+    var socket = io();
+
+    // socket.on('createPlayer', function(data, level){
+    //     // loadLevelFromUrl(level);createPlayer
+    //     // console.log('createPlayer')
+    // });
+
+    socket.on('setClientEntities', function(data){
+        if(data.newConnection){
+            // console.log(data.newConnection.level)
+            // console.log(data.newConnection.localPlayer)
+            loadLevel(data.newConnection.level)
+            createLocalPlayer(data.newConnection.localPlayer);
+            updatePlayerPhysics(data.playerStates);
+        } else if(player) {
+            console.log("initialized")
+            updatePlayerPhysics(data.playerStates);
+        }
+        if(data.disconnects){
+        }
+    });
+
+    socket.on('addOtherPlayer', function(data){
+        addOtherPlayer(data);
+    }); 
+
+    socket.on('updateClients', function(data){
+        console.log("updateClients")
+        if(data.disconnects){
+            for(client in data.disconnects){
+                removeOtherPlayer(disconnects[client]);
+            }
+        }
+
+        if(data.playerStates){
+            updatePlayerPhysics(data.playerStates);
+        }
+    }); 
+
+    socket.on('updateAllPlayers', function(data){
+        updateAllPlayers(data);
+    });
+
+    socket.on('connect', function(){
+        loadWorld();
+        socket.emit('getEntities');
+    });
+
+    socket.on('removeOtherPlayer', function(data){
+        removeOtherPlayer(data);
+    });
+
+</script>
+</body>
+</html>
