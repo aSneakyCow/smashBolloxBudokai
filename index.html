@@ -81,48 +81,45 @@
     // });
 
     socket.on('setClientEntities', function(data){
-        if(data.newConnection){
-            // console.log(data.newConnection.level)
-            // console.log(data.newConnection.localPlayer)
-            loadLevel(data.newConnection.level)
-            createLocalPlayer(data.newConnection.localPlayer);
-            updatePlayerPhysics(data.playerStates);
-        } else if(player) {
-            console.log("initialized")
-            updatePlayerPhysics(data.playerStates);
-        }
-        if(data.disconnects){
-        }
-    });
-
-    socket.on('addOtherPlayer', function(data){
-        addOtherPlayer(data);
-    }); 
-
-    socket.on('updateClients', function(data){
-        console.log("updateClients")
-        if(data.disconnects){
-            for(client in data.disconnects){
-                removeOtherPlayer(disconnects[client]);
+        function createOlderPlayers(playerStates){
+            for(let i = 0; i < playerStates.length; i++){
+                if(playerStates[i].id != player.id){
+                    addOtherPlayer(playerStates[i])
+                }
             }
         }
 
-        if(data.playerStates){
+        if( data.disconnects && !data.firstConnection ){
+            for(id in data.disconnects){
+                removeOtherPlayer(data.disconnects[id]);
+            }
+        }
+
+        if(data.firstConnection){
+            loadLevel(data.firstConnection.level)
+            createLocalPlayer(data.firstConnection.localPlayer);
+            createOlderPlayers(data.playerStates)
+            updatePlayerPhysics(data.playerStates);
+        } else if(player) {
+            if(data.newPlayers){
+                for(id in data.newPlayers){
+                    for(let i = 0; i < data.playerStates.length; i++){
+                        if(data.newPlayers[id] == data.playerStates[i].id){
+                            if( data.newPlayers[id]!= player.id ){
+                                addOtherPlayer(data.playerStates[i])
+                            }
+                        }
+                    }
+                }
+            }
+
             updatePlayerPhysics(data.playerStates);
         }
-    }); 
-
-    socket.on('updateAllPlayers', function(data){
-        updateAllPlayers(data);
-    });
+    });  
 
     socket.on('connect', function(){
         loadWorld();
         socket.emit('getEntities');
-    });
-
-    socket.on('removeOtherPlayer', function(data){
-        removeOtherPlayer(data);
     });
 
 </script>

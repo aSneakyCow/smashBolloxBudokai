@@ -132,7 +132,7 @@ var loadWorld = function(){
 };
  
 var createLocalPlayer = function( data ){
-    console.log(data)
+    // console.log(data)
     var mesh = createMeshForPlayer( data.state )
     var info = new PlayerState();
 
@@ -179,9 +179,6 @@ var updateAllPlayers = function(data){
     var rot = data.state.rotation
     var somePlayer = playerForId(data.id);
 
-    // console.log(pos.x + " " + pos.y + " " + pos.z)
-    // console.log(data.id)
-
     if(data.id == player.id){
         player.coll.position.x = pos.x;
         player.coll.position.y = pos.y;
@@ -191,7 +188,6 @@ var updateAllPlayers = function(data){
         player.coll.rotation.y = rot.y;
         player.coll.rotation.z = rot.z;    
     } else {
-        console.log("updating...somePlayer ")
         somePlayer.coll.position.x = data.state.position.x;
         somePlayer.coll.position.y = data.state.position.y;
         somePlayer.coll.position.z = data.state.position.z;
@@ -200,20 +196,19 @@ var updateAllPlayers = function(data){
         somePlayer.coll.rotation.y = data.state.rotation.y;
         somePlayer.coll.rotation.z = data.state.rotation.z;
     }
-    // console.log(player.coll.position)
 };
  
 var checkKeyStates = function(){
-    // console.log("checking")
     if(inputUpdate){    //there's lag on this now, so fix it later
         socket.emit('updatePosition', player.id, keyState);
     } 
 };
 
-var removeOtherPlayer = function(data){
-    index = getIndex(data.id)
+var removeOtherPlayer = function(id){
+    index = getIndex(id)
+
     scene.remove( otherPlayers[index].coll );
-    otherPlayers.slice( otherPlayers[index] , 1);
+    otherPlayers.splice( index, 1);
 };
 
 var getIndex = function(id){
@@ -228,7 +223,6 @@ var getIndex = function(id){
 var playerForId = function(id){
     for (var i = 0; i < otherPlayers.length; i++){
         if (otherPlayers[i].id == id){
-            console.log(otherPlayers[i])
             return otherPlayers[i];
         }
     }

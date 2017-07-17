@@ -3,6 +3,7 @@ var oldPlayers = []
 oldPlayers[0] = []
 var removePlayers = []
 var connectEvents = []
+var newPlayerIds = []
 
 var scene;
 var raycaster;
@@ -36,7 +37,7 @@ var getCurrentMap = function(){
 
 function stepScene(ms){
     for(player in removePlayers){
-        console.log( "removing " + removePlayers[player])
+        // console.log( "removing " + removePlayers[player])
         removePlayer(removePlayers[player])
     }
 
@@ -98,6 +99,10 @@ var getConnectEvents = function(){
     return connectEvents;
 }
 
+var getNewPlayers = function(){
+    return newPlayerIds;
+}
+
 var setInitialized = function(id){
     var player = playerForId(id)
     player.state.initialized = true
@@ -110,6 +115,7 @@ var getClientWorld = function(localPlayer){
     entities.level = getCurrentMap()
 
     connectEvents.push( {targetId:localPlayer.id, entities: entities})
+    newPlayerIds.push( localPlayer.id )
 }
 
 var addInputEvent = function(event){
@@ -127,6 +133,7 @@ var clearEvents = function(){
     removePlayers.length = 0;
     inputEvents.length = 0;
     connectEvents.length = 0;
+    newPlayerIds.length = 0;
 }
 
 var getDisconnets = function(){
@@ -155,8 +162,7 @@ var removePlayer = function(id){
 var updatePlayerData = function(id, input){
     var player = playerForId(id);
     var keyState = input;
-    var updated = false; 
-
+    var updated = false;
 
     //moved these since the other things depend on these
     if (keyState[37] || keyState[65]) {
@@ -168,8 +174,7 @@ var updatePlayerData = function(id, input){
         // right arrow or 'd' - rotate right
         player.coll.rotation.y -= player.state.turnSpeed;
         updated = true;
-    }
-
+    } 
     if (keyState[38] || keyState[87]) {
         // up arrow or 'w' - move forward
         player.coll.position.x -= player.state.speed * Math.sin(player.coll.rotation.y);
@@ -195,8 +200,7 @@ var updatePlayerData = function(id, input){
         updated = true;
     }
 
-    if(updated){
-
+    if(updated){ 
         collToState(player.coll, player.state);
     }
 
@@ -258,6 +262,7 @@ var getNetPlayer = function(player){
 }
 
 module.exports.setInitialized = setInitialized;
+module.exports.getNewPlayers = getNewPlayers;
 module.exports.getConnectEvents = getConnectEvents;
 module.exports.getClientWorld = getClientWorld;
 module.exports.getDisconnets = getDisconnets;

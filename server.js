@@ -49,11 +49,16 @@ function emitToAll() {
     var connectEvents;
     var playerId;
     var packet = {}
-
+    var newPlayers = world.getNewPlayers()
 
     if(world.getDisconnets().length){
+        console.log("Disconnects:")
         console.log(world.getDisconnets())
         packet.disconnects = disconnects
+    }
+
+    if(newPlayers.length){
+        packet.newPlayers = newPlayers
     }
 
     if(world.getConnectEvents()){
@@ -63,8 +68,8 @@ function emitToAll() {
     for(player in playerStates){
         loop2:
         for(c in connectEvents){
-            if(connectEvents[c].targetId == playerStates[player].id){
-                packet.newConnection = connectEvents[c].entities
+            if( connectEvents[c].targetId == playerStates[player].id ){
+                packet.firstConnection = connectEvents[c].entities
                 world.setInitialized(playerStates[player].id)
                 break loop2;
             } 
@@ -73,7 +78,7 @@ function emitToAll() {
         playerId = playerStates[player].id
         packet.playerStates = playerStates;
 
-        if(packet.newConnection == true || playerStates[player].state.initialized ){
+        if(packet.firstConnection == true || playerStates[player].state.initialized ){
             emitToPlayer(playerId, packet)
         }
     }                   
@@ -85,8 +90,9 @@ function emitToPlayer(id, data) {
     io.sockets.connected[id].emit('setClientEntities', 
         {
          playerStates: data.playerStates,
-         newConnection: data.newConnection,
+         firstConnection: data.firstConnection,
          disconnects:   data.disconnects,
+         newPlayers:   data.newPlayers,
         });
 }
 
@@ -99,41 +105,25 @@ io.on('connection', function(socket){
 
     var player = world.playerForId(id);
 
-    // socket.emit('createPlayer', world.getNetPlayer(player), world.getCurrentMap());
-
-    socket.broadcast.emit('addOtherPlayer', world.getNetPlayer(player));
+    // socket.broadcast.emit('addOtherPlayer', world.getNetPlayer(player));
 
     socket.on('getEntities', function(){
         world.getClientWorld(player); 
     });
 
-    // socket.on('requestOldPlayers', function(){
-    //     for (var i = 0; i < world.players.length; i++){
-    //         if (world.players[i].id != id){
-    //             console.log("emit addOtherPlayer")
-    //             socket.emit('addOtherPlayer', world.getNetPlayer(world.players[i]));
-    //         }
-    //     }
-    // });
-
     socket.on('updatePosition', function(id, input){
-        world.addInputEvent({id: id, input: input})
-        // io.emit('updateAllPlayers', netPlayer);                  //all
-        // socket.emit('updateAllPlayers', newData);           //only player
-        // socket.broadcast.emit('updateAllPlayers', newData); //all other players
+        world.addInputEvent({id: id, input: input}) 
     });
 
     socket.on('disconnect', function(){
         console.log('user disconnected');
         world.queueDisconnect( player.id );
-        //check if there are no more players, then MainLoop.stop()
     });
 
 });
 
 // Handle environment changes
 var port = process.env.PORT || 8080;
-// var ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
  
 http.listen( port, /*ip_address,*/ function(){
     console.log( "Listening on server_port " + port );
